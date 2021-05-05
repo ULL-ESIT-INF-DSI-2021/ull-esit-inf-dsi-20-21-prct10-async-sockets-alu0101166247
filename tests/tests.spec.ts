@@ -1,34 +1,32 @@
+/* eslint-disable max-len */
 import 'mocha';
 import {expect} from 'chai';
-import {add, substract} from '../src/ejercicio1';
+import {Note} from '../src/server/note';
+import {User} from '../src/server/user';
 
-describe('add function tests', () => {
-  it('add(1, 8) returns value 9', () => {
-    expect(add(1, 8)).to.be.equal(9);
+
+describe('Note Class tests:', () => {
+  // Notes
+  const RedNote = new Note('Red Note', 'This is a red note', 'red');
+
+  // Note Tests
+  it('RedNote.getTitle() returns value Red Note', () => {
+    expect(RedNote.getTitle()).to.be.equal('Red Note');
   });
-
-  it('add(-1, 8) returns value 7', () => {
-    expect(add(-1, 8)).to.be.equal(7);
+  it('RedNote.getBody() returns value This is a red note', () => {
+    expect(RedNote.getBody()).to.be.equal('This is a red note');
   });
-
-  it('add(1.2, 3.5) returns value 4.7', () => {
-    expect(add(1.2, 3.5)).to.be.approximately(4.7, 0.000000000001);
+  it('RedNote.getColor() returns value Red', () => {
+    expect(RedNote.getColor()).to.be.equal('red');
   });
 });
 
-describe('substract function tests', () => {
-  it('substract(7, 1) returns value 6', () => {
-    expect(substract(7, 1)).to.be.equal(6);
-  });
+describe('User Class tests:', () => {
+  // User
+  const Dany = new User('Dany');
 
-  it('substract(6.7, 3.1) returns value 3.6', () => {
-    expect(substract(6.7, 3.1)).to.be.approximately(3.6, 0.000000000001);
-  });
-
-  it('substract(5, 7) returns value -2', () => {
-    expect(substract(5, 7)).to.be.equal(-2);
-  });
-  it('substract(6.7, 9.8) returns value -3.1', () => {
-    expect(substract(6.7, 9.8)).to.be.approximately(-3.1, 0.000000000001);
+  // User Tests
+  it('Dany.readNote(\'No Test Note\') returns value false', () => {
+    expect(Dany.readNote('No Test Note')).to.be.equal(false);
   });
 });

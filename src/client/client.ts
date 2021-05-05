@@ -2,7 +2,7 @@
 import * as net from 'net';
 import * as yargs from 'yargs';
 import * as chalk from 'chalk';
-import {ResponseType, RequestType} from '../server/server';
+import {RequestType} from '../server/server';
 import {Note} from '../server/note';
 
 const client = net.connect({port: 60300});
@@ -44,7 +44,7 @@ yargs.command({
         body: argv.body,
         color: argv.color,
       };
-      client.write(JSON.stringify(request));
+      client.write(JSON.stringify(request) + '\n');
     }
   },
 });
@@ -68,7 +68,7 @@ yargs.command({
         type: 'list',
         user: argv.user,
       };
-      client.write(JSON.stringify(request));
+      client.write(JSON.stringify(request) + '\n');
     }
   },
 });
@@ -110,7 +110,7 @@ yargs.command({
         body: argv.body,
         color: argv.color,
       };
-      client.write(JSON.stringify(request));
+      client.write(JSON.stringify(request) + '\n');
     }
   },
 });
@@ -140,7 +140,7 @@ yargs.command({
         user: argv.user,
         title: argv.title,
       };
-      client.write(JSON.stringify(request));
+      client.write(JSON.stringify(request) + '\n');
     }
   },
 });
@@ -170,58 +170,76 @@ yargs.command({
         user: argv.user,
         title: argv.title,
       };
-      client.write(JSON.stringify(request));
+      client.write(JSON.stringify(request) + '\n');
     }
   },
 });
 
+/**
+ * Funcion para mostrar por consola las notas
+ * @param notes Arreglo de notas
+ */
 function printNotes(notes: Note[]) {
-  console.log(notes);
-  /*
+  // console.log(notes);
   for (let i = 0; i < notes.length; i++) {
-    if (notes[i].getColor() === 'blue') {
-      console.log(chalk.blue(notes[i].getTitle()));
+    if (notes[i].color === 'blue') {
+      console.log(chalk.blue(notes[i].title));
     }
-    if (notes[i].getColor() === 'green') {
-      console.log(chalk.green(notes[i].getTitle()));
+    if (notes[i].color === 'red') {
+      console.log(chalk.red(notes[i].title));
     }
-    if (notes[i].getColor() === 'red') {
-      console.log(chalk.red(notes[i].getTitle()));
+    if (notes[i].color === 'green') {
+      console.log(chalk.green(notes[i].title));
     }
-    if (notes[i].getColor() === 'yellow') {
-      console.log(chalk.yellow(notes[i].getTitle()));
+    if (notes[i].color === 'yellow') {
+      console.log(chalk.yellow(notes[i].title));
     }
-  }*/
+  }
 }
 
+/**
+ * Funcion para mostar una nota con su contenido
+ * @param notes Arreglo de notas
+ */
 function printOneNote(notes: Note[]) {
   const i = 0;
-  console.log(notes[i]);
-  /*
-  if (notes[i].getColor() === 'blue') {
-    console.log(chalk.blue(notes[i].getTitle()));
-    console.log(chalk.blue(notes[i].getBody()));
-    console.log(chalk.blue(notes[i].getColor()));
+  if (notes[i].color === 'blue') {
+    console.log(chalk.blue(notes[i].title));
+    console.log(chalk.blue(notes[i].body));
   }
-  if (notes[i].getColor() === 'green') {
-    console.log(chalk.green(notes[i].getTitle()));
-    console.log(chalk.green(notes[i].getBody()));
-    console.log(chalk.green(notes[i].getColor()));
+  if (notes[i].color === 'red') {
+    console.log(chalk.red(notes[i].title));
+    console.log(chalk.red(notes[i].body));
   }
-  if (notes[i].getColor() === 'red') {
-    console.log(chalk.red(notes[i].getTitle()));
-    console.log(chalk.red(notes[i].getBody()));
-    console.log(chalk.red(notes[i].getColor()));
+  if (notes[i].color === 'green') {
+    console.log(chalk.green(notes[i].title));
+    console.log(chalk.green(notes[i].body));
   }
-  if (notes[i].getColor() === 'yellow') {
-    console.log(chalk.yellow(notes[i].getTitle()));
-    console.log(chalk.yellow(notes[i].getBody()));
-    console.log(chalk.yellow(notes[i].getColor()));
-  }*/
+  if (notes[i].color === 'yellow') {
+    console.log(chalk.yellow(notes[i].title));
+    console.log(chalk.yellow(notes[i].body));
+  }
 }
 
-client.on('data', (dataJSON) => {
-  const response:ResponseType = JSON.parse(dataJSON.toString());
+/**
+ * Evento que recibe pedazos de datos del servidor y emite un evento cuando se completa un mensaje completo
+ */
+let wholeData = '';
+client.on('data', (dataChunk) => {
+  wholeData += dataChunk;
+  let messageLimit = wholeData.indexOf('\n');
+  while (messageLimit !== -1) {
+    const message = wholeData.substring(0, messageLimit);
+    wholeData = wholeData.substring(messageLimit + 1);
+    client.emit('response', JSON.parse(message));
+    messageLimit = wholeData.indexOf('\n');
+  }
+});
+
+/**
+ * Evento que se ejecuta cuando un response del servidor se completa
+ */
+client.on('response', (response) => {
   if (response.type === 'add') {
     if (response.success) {
       console.log(chalk.green('New note added!'));

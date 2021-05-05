@@ -7,7 +7,14 @@ import chalk = require('chalk');
  * Clase para representar un Usuario
  */
 export class User {
+  /**
+   * Arreglo que guarda las notas de un usuario
+   */
   private notes: Note[] = [];
+  /**
+   * Constructor de la clase
+   * @param name Nombre del usuario
+   */
   constructor(
         private name: string) {
     const folderExist: boolean = fs.existsSync(`/home/usuario/notes-app-server/${this.name}`);
@@ -24,10 +31,18 @@ export class User {
     }
   }
 
+  /**
+   * Get del nombre
+   * @returns Nombre
+   */
   public getName(): string {
     return this.name;
   }
 
+  /**
+   * Funcion que devuelve todas las notas de un usuario
+   * @returns Arreglo con las notas de un usuario
+   */
   public listNotes(): boolean | Note[] {
     if (this.notes.length === 0) {
       return false;
@@ -36,6 +51,13 @@ export class User {
     }
   }
 
+  /**
+   * Funcion que agrega una nota a un usuario
+   * @param title Titulo
+   * @param body Contenido
+   * @param color Color
+   * @returns True o False depende del resultado
+   */
   public addNote(title: string, body: string, color: string): boolean {
     const fileExist: boolean = fs.existsSync(`/home/usuario/notes-app-server/${this.name}/${title}.json`);
     if (fileExist == false) {
@@ -49,6 +71,11 @@ export class User {
     }
   }
 
+  /**
+   * Funcion que elimina una nota de un usuario
+   * @param title Titulo
+   * @returns True o False depende del resultado
+   */
   public removeNote(title: string): boolean {
     const fileExist: boolean = fs.existsSync(`/home/usuario/notes-app-server/${this.name}/${title}.json`);
     if (fileExist == false) {
@@ -70,6 +97,13 @@ export class User {
     }
   }
 
+  /**
+   * Funcion que actualiza una nota de un usuario
+   * @param title Titulo
+   * @param body Contenido
+   * @param color Color
+   * @returns True o False depende del resultado
+   */
   public updateNote(title: string, body: string, color: string): boolean {
     const fileExist: boolean = fs.existsSync(`/home/usuario/notes-app-server/${this.name}/${title}.json`);
     if (fileExist == false) {
@@ -92,7 +126,11 @@ export class User {
     }
   }
 
-
+  /**
+   * Funcion que devuelve una nota en especifico
+   * @param title Titulo
+   * @returns Nota buscada
+   */
   public readNote(title: string): boolean | Note {
     const fileExist: boolean = fs.existsSync(`/home/usuario/notes-app-server/${this.name}/${title}.json`);
     if (fileExist == false) {

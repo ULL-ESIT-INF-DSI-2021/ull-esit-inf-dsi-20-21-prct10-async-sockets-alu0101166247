@@ -4,6 +4,9 @@ import * as net from 'net';
 import {Note} from './note';
 import {User} from './user';
 
+/**
+ * Tipo de dato para representar un request para el servidor
+ */
 export type RequestType = {
     type: 'add' | 'update' | 'remove' | 'read' | 'list';
     user: string;
@@ -12,6 +15,9 @@ export type RequestType = {
     color?: string;
   }
 
+/**
+ * Tipo de dato para representar un response para el cliente
+ */
 export type ResponseType = {
     type: 'add' | 'update' | 'remove' | 'read' | 'list';
     success: boolean;
@@ -21,9 +27,25 @@ export type ResponseType = {
 const server = net.createServer({allowHalfOpen: true}, (connection) => {
   console.log(chalk.green('A client has connected.'));
 
+  /**
+  * Evento que recibe pedazos de datos del cliente y emite un evento cuando se completa un mensaje completo
+  */
+  let wholeData = '';
+  connection.on('data', (dataChunk) => {
+    wholeData += dataChunk;
+    let messageLimit = wholeData.indexOf('\n');
+    while (messageLimit !== -1) {
+      const message = wholeData.substring(0, messageLimit);
+      wholeData = wholeData.substring(messageLimit + 1);
+      connection.emit('request', JSON.parse(message));
+      messageLimit = wholeData.indexOf('\n');
+    }
+  });
 
-  connection.on('data', (dataJSON) => {
-    const request: RequestType = JSON.parse(dataJSON.toString());
+  /**
+  * Evento que se ejecuta cuando un request del cliente se completa
+  */
+  connection.on('request', (request) => {
     if (request.type === 'add') {
       const user = new User(request.user);
       if (request.title != undefined && request.body != undefined && request.color != undefined) {
@@ -32,14 +54,14 @@ const server = net.createServer({allowHalfOpen: true}, (connection) => {
             type: 'add',
             success: true,
           };
-          connection.write(JSON.stringify(response));
+          connection.write(JSON.stringify(response) + '\n');
           connection.end();
         } else {
           const response: ResponseType = {
             type: 'add',
             success: false,
           };
-          connection.write(JSON.stringify(response));
+          connection.write(JSON.stringify(response) + '\n');
           connection.end();
         }
       }
@@ -52,14 +74,14 @@ const server = net.createServer({allowHalfOpen: true}, (connection) => {
             type: 'update',
             success: true,
           };
-          connection.write(JSON.stringify(response));
+          connection.write(JSON.stringify(response) + '\n');
           connection.end();
         } else {
           const response: ResponseType = {
             type: 'update',
             success: false,
           };
-          connection.write(JSON.stringify(response));
+          connection.write(JSON.stringify(response) + '\n');
           connection.end();
         }
       }
@@ -72,14 +94,14 @@ const server = net.createServer({allowHalfOpen: true}, (connection) => {
             type: 'remove',
             success: true,
           };
-          connection.write(JSON.stringify(response));
+          connection.write(JSON.stringify(response) + '\n');
           connection.end();
         } else {
           const response: ResponseType = {
             type: 'remove',
             success: false,
           };
-          connection.write(JSON.stringify(response));
+          connection.write(JSON.stringify(response) + '\n');
           connection.end();
         }
       }
@@ -92,19 +114,17 @@ const server = net.createServer({allowHalfOpen: true}, (connection) => {
             type: 'read',
             success: false,
           };
-          connection.write(JSON.stringify(response));
+          connection.write(JSON.stringify(response) + '\n');
           connection.end();
         } else {
           const note = user.readNote(request.title);
-          /* setTimeout(() => {
-          }, 500);*/
           if (typeof note != 'boolean') {
             const response: ResponseType = {
               type: 'read',
               success: true,
               notes: [note],
             };
-            connection.write(JSON.stringify(response));
+            connection.write(JSON.stringify(response) + '\n');
             connection.end();
           }
         }
@@ -117,19 +137,17 @@ const server = net.createServer({allowHalfOpen: true}, (connection) => {
           type: 'list',
           success: false,
         };
-        connection.write(JSON.stringify(response));
+        connection.write(JSON.stringify(response) + '\n');
         connection.end();
       } else {
         const notes = user.listNotes();
-        /* setTimeout(() => {
-        }, 500);*/
         if (typeof notes != 'boolean') {
           const response: ResponseType = {
             type: 'list',
             success: true,
             notes: notes,
           };
-          connection.write(JSON.stringify(response));
+          connection.write(JSON.stringify(response) + '\n');
           connection.end();
         }
       }
