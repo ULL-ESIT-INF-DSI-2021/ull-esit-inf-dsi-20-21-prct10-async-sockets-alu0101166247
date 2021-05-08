@@ -29,4 +29,4 @@ describe('User Class tests:', () => {
   it('Dany.readNote(\'No Test Note\') returns value false', () => {
     expect(Dany.readNote('No Test Note')).to.be.equal(false);
   });
-});
+}); 
